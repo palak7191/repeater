@@ -123,7 +123,7 @@ export default function Live({ onSummary, onAnalytics, onSettings }) {
           {/* Sparkline */}
           {currentSession?.pnlCurve && currentSession.pnlCurve.length > 1 && (
             <div className="live__sparkline">
-              <Sparkline values={currentSession.pnlCurve} height={40} showAxis={false} />
+              <Sparkline values={currentSession.pnlCurve} height={80} />
             </div>
           )}
 
