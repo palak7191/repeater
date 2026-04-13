@@ -332,6 +332,56 @@
     margin-bottom: 8px;
     font-family: var(--font-mono);
   }
+
+  /* ── INLINE KEYBOARD INPUT ── */
+  .kb-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .kb-inline {
+    flex: 1;
+    background: var(--s2);
+    border: 2px solid var(--border2);
+    border-radius: var(--r);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    padding: 10px 14px;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .kb-inline::-webkit-inner-spin-button,
+  .kb-inline::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .kb-inline:focus { border-color: var(--gold); }
+  .kb-inline.has-val { border-color: var(--gold); }
+  .kb-inline-enter {
+    padding: 10px 16px;
+    background: var(--win);
+    border: none;
+    border-radius: var(--r);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .15s;
+  }
+  .kb-inline-enter.disabled {
+    background: var(--s3);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+  .kb-inline-enter:not(.disabled):active { opacity: .8; }
+  .kb-inline-hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+    min-height: 16px;
+  }
   /* ── SPIN ENTRY ── */
   /* Display — shows typed number large */
   .entry-display {
@@ -923,9 +973,23 @@
       <!-- Large number display -->
       <div class="card">
         <div class="card-title" id="table-label">What landed?</div>
+
+        <!-- Keyboard / type input — always visible on desktop -->
+        <div class="kb-row">
+          <input class="kb-inline" id="kb-inline" type="number"
+                 min="0" max="36" placeholder="type number..."
+                 autocomplete="off" inputmode="numeric"
+                 oninput="onKbInlineInput()"
+                 onkeydown="onKbInlineKeydown(event)">
+          <button class="kb-inline-enter disabled" id="kb-inline-enter"
+                  onclick="onKbInlineEnter()">↵ ENTER</button>
+        </div>
+        <div class="kb-inline-hint" id="kb-inline-hint">type 0–36 then press Enter</div>
+
+        <!-- Display + grid + keypad — always visible -->
         <div class="entry-display" id="entry-display">
           <div class="entry-num empty" id="entry-num">—</div>
-          <div class="entry-hint" id="entry-hint">type the number</div>
+          <div class="entry-hint" id="entry-hint">or use keypad below</div>
         </div>
 
         <!-- Reference grid -->
