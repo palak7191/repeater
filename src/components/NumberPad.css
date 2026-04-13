@@ -1,0 +1,146 @@
+/* ── NUMBER PAD ───────────────────────────────────────────────── */
+.numpad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  width: 100%;
+}
+
+.numpad__zero {
+  width: 100%;
+  padding: var(--gap-md);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: var(--green-zero);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.numpad__zero:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 0 12px var(--green-zero);
+}
+.numpad__zero:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.numpad__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.numpad__row {
+  display: flex;
+  gap: 2px;
+}
+
+.numpad__btn {
+  flex: 1;
+  aspect-ratio: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.15s;
+  position: relative;
+}
+
+.numpad__btn--red {
+  background: var(--red-num);
+  color: white;
+}
+.numpad__btn--black {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.numpad__btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  z-index: 1;
+}
+.numpad__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Chip highlight - intersection numbers */
+.numpad__btn--chip {
+  box-shadow: 0 0 0 2px var(--gold), 0 0 12px var(--gold);
+  animation: glow 1.5s ease-in-out infinite;
+  z-index: 2;
+}
+
+/* Dozen tint */
+.numpad__btn--dozen {
+  box-shadow: inset 0 0 0 2px var(--gold-dim);
+}
+
+/* Column tint */
+.numpad__btn--column {
+  box-shadow: inset 0 0 0 2px var(--partial);
+}
+
+/* Column labels */
+.numpad__col-label {
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+.numpad__col-label--active {
+  color: var(--partial);
+  background: var(--partial-bg);
+}
+
+/* Dozen labels */
+.numpad__dozen-row {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+}
+.numpad__dozen-label {
+  flex: 1;
+  padding: var(--gap-xs) var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+.numpad__dozen-label--active {
+  color: var(--gold);
+  background: var(--gold-bg);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .numpad__btn {
+    font-size: 0.75rem;
+  }
+  .numpad__col-label {
+    width: 24px;
+    font-size: 0.55rem;
+  }
+  .numpad__dozen-label {
+    font-size: 0.55rem;
+  }
+}

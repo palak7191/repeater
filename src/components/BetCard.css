@@ -1,0 +1,301 @@
+/* ── BET CARD ─────────────────────────────────────────────────── */
+.betcard {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Urgency levels */
+.betcard--base {
+  border-color: var(--win-border);
+}
+.betcard--mid {
+  border-color: var(--amber);
+}
+.betcard--high {
+  border-color: var(--orange);
+}
+.betcard--critical {
+  border-color: var(--loss);
+  animation: pulse 1s ease-in-out infinite;
+  box-shadow: 0 0 20px var(--loss-bg);
+}
+
+/* Modes */
+.betcard--warmup {
+  border-color: var(--border);
+}
+.betcard--observe {
+  border-color: var(--amber);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--gold-bg) 100%);
+}
+.betcard--empty {
+  border-color: var(--border);
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* Change indicator */
+.betcard__change {
+  position: absolute;
+  top: -10px;
+  right: var(--gap-md);
+  padding: var(--gap-xs) var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  animation: flash 1.5s ease-out forwards;
+}
+.betcard__change--position {
+  background: var(--partial);
+  color: white;
+}
+.betcard__change--size {
+  background: var(--loss);
+  color: white;
+}
+.betcard__change--both {
+  background: var(--zero-col);
+  color: white;
+}
+
+/* Header */
+.betcard__header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+.betcard__mode {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  background: var(--gold-bg);
+  padding: var(--gap-xs) var(--gap-sm);
+  border-radius: var(--radius-sm);
+}
+.betcard__window {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+.betcard__ladder {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--partial);
+  margin-left: auto;
+}
+
+/* Warmup content */
+.betcard__warmup-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-md) 0;
+}
+.betcard__warmup-count {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.betcard__warmup-msg {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.betcard__warmup-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.betcard__warmup-progress {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s;
+}
+
+/* Observe content */
+.betcard__observe-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-md) 0;
+}
+.betcard__observe-icon {
+  font-size: 2.5rem;
+}
+.betcard__observe-msg {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--amber);
+}
+.betcard__observe-hint {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+/* Bet info */
+.betcard__bet-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-xs);
+}
+.betcard__position {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+.betcard__doz {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.betcard__plus {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+}
+.betcard__col {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--partial);
+}
+.betcard__amount {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.betcard__ratchet {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--win);
+  background: var(--win-bg);
+  padding: var(--gap-xs) var(--gap-sm);
+  border-radius: var(--radius-sm);
+}
+
+/* Chips section */
+.betcard__chips {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: var(--gap-sm) var(--gap-md);
+}
+.betcard__chips-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: var(--gap-xs);
+}
+.betcard__chips-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+}
+.betcard__chip-num {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--gold-bg);
+  padding: var(--gap-xs) var(--gap-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gold-dim);
+}
+
+/* Ladder reference */
+.betcard__ladder-ref {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  overflow-x: auto;
+}
+.betcard__ladder-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--gap-xs) var(--gap-sm);
+  border-radius: var(--radius-sm);
+  flex: 1;
+  min-width: 45px;
+}
+.betcard__ladder-item--active {
+  background: var(--gold-bg);
+}
+.betcard__ladder-level {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+.betcard__ladder-item--active .betcard__ladder-level {
+  color: var(--gold);
+}
+.betcard__ladder-amt {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.betcard__ladder-item--active .betcard__ladder-amt {
+  color: var(--text);
+}
+
+/* Actions */
+.betcard__actions {
+  display: flex;
+  gap: var(--gap-sm);
+}
+.betcard__action {
+  flex: 1;
+  padding: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.betcard__action--missed {
+  background: var(--loss-bg);
+  border-color: var(--loss-border);
+  color: var(--loss);
+}
+.betcard__action--missed:hover {
+  background: var(--loss-border);
+  color: white;
+}
+.betcard__action--partial {
+  background: var(--partial-bg);
+  border-color: var(--partial);
+  color: var(--partial);
+}
+.betcard__action--partial:hover {
+  background: var(--partial);
+  color: white;
+}
+
+/* Empty state */
+.betcard__msg {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}

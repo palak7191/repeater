@@ -1,0 +1,73 @@
+/* ── TOAST ────────────────────────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: var(--gap-md);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.2s ease-out;
+  pointer-events: auto;
+}
+
+.toast--switch {
+  border-color: var(--partial);
+  background: var(--partial-bg);
+}
+
+.toast--ratchet {
+  border-color: var(--win-border);
+  background: var(--win-bg);
+}
+
+.toast--observe {
+  border-color: var(--amber);
+  background: var(--gold-bg);
+}
+
+.toast--error {
+  border-color: var(--loss-border);
+  background: var(--loss-bg);
+}
+
+.toast__icon {
+  font-size: 1rem;
+}
+
+.toast--switch .toast__icon { color: var(--partial); }
+.toast--ratchet .toast__icon { color: var(--win); }
+.toast--observe .toast__icon { color: var(--amber); }
+.toast--error .toast__icon { color: var(--loss); }
+
+.toast__message {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.toast__dismiss {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 var(--gap-xs);
+  line-height: 1;
+}
+.toast__dismiss:hover {
+  color: var(--text);
+}

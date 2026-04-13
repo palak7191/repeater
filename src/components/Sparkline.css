@@ -1,0 +1,56 @@
+/* ── SPARKLINE ────────────────────────────────────────────────── */
+.sparkline {
+  position: relative;
+  width: 100%;
+}
+
+.sparkline--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.sparkline__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.sparkline__labels {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--gap-xs);
+  pointer-events: none;
+}
+
+.sparkline__label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-shadow: 0 0 4px var(--bg);
+}
+
+.sparkline__label--max {
+  align-self: flex-end;
+}
+
+.sparkline__label--current {
+  align-self: flex-end;
+  font-size: 0.8rem;
+  background: var(--surface);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.sparkline__label--min {
+  align-self: flex-end;
+}

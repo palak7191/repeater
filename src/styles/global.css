@@ -1,0 +1,123 @@
+/* ── DESIGN SYSTEM ────────────────────────────────────────────── */
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface-2: #1c2128;
+  --surface-3: #21262d;
+  --border: #30363d;
+  --border-2: #3d444d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --text-muted: #484f58;
+  --gold: #d4a017;
+  --gold-dim: #7d5e0a;
+  --gold-bg: #1a1400;
+  --win: #3fb950;
+  --win-bg: #0a1f0e;
+  --win-border: #238636;
+  --loss: #f85149;
+  --loss-bg: #1a0a09;
+  --loss-border: #da3633;
+  --zero-col: #8957e5;
+  --zero-bg: #130d2e;
+  --partial: #58a6ff;
+  --partial-bg: #051525;
+  --amber: #d29922;
+  --orange: #f0883e;
+  --d1: #f59e0b;
+  --d2: #58a6ff;
+  --d3: #3fb950;
+  --red-num: #c53030;
+  --red-num-bg: #2a0808;
+  --green-zero: #2d9e4a;
+  --warmup: #8b949e;
+
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-ui: 'DM Sans', sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 32px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── UTILITY CLASSES ──────────────────────────────────────────── */
+.mono { font-family: var(--font-mono); }
+.dimmed { color: var(--text-dim); }
+.muted { color: var(--text-muted); }
+.positive { color: var(--win); }
+.negative { color: var(--loss); }
+.gold { color: var(--gold); }
+.partial-col { color: var(--partial); }
+.zero-col { color: var(--zero-col); }
+
+/* ── SCROLLBAR ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-2);
+}
+
+/* ── ANIMATIONS ───────────────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 8px var(--gold); }
+  50% { box-shadow: 0 0 16px var(--gold), 0 0 24px var(--gold-dim); }
+}
+
+@keyframes flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
+.animate-glow { animation: glow 1.5s ease-in-out infinite; }

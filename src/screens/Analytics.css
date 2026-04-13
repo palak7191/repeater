@@ -1,0 +1,388 @@
+/* ── ANALYTICS SCREEN ─────────────────────────────────────────── */
+.ana {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Header */
+.ana__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-sm) var(--gap-md);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.ana__back {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: var(--gap-xs) var(--gap-md);
+  cursor: pointer;
+}
+.ana__back:hover { background: var(--border); color: var(--text); }
+
+.ana__title {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+
+/* Tabs */
+.ana__tabs {
+  display: flex;
+  gap: 2px;
+  padding: var(--gap-sm) var(--gap-md);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.ana__tab {
+  flex: 1;
+  padding: var(--gap-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.ana__tab:hover { color: var(--text); }
+.ana__tab--active {
+  background: var(--gold-bg);
+  border-color: var(--gold-dim);
+  color: var(--gold);
+}
+
+/* Body */
+.ana__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap-md);
+}
+
+/* Empty */
+.ana__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-md);
+  padding: var(--gap-xl);
+}
+.ana__empty-icon { font-size: 2rem; color: var(--gold-dim); }
+.ana__empty-msg { color: var(--text-dim); }
+.ana__btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  padding: var(--gap-sm) var(--gap-lg);
+  cursor: pointer;
+  font-family: var(--font-mono);
+}
+
+/* Sessions list */
+.ana__sessions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.ana__session-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  transition: border-color 0.15s;
+}
+.ana__session-card:hover { border-color: var(--border-2); }
+
+.ana__session-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.ana__session-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ana__session-table {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.ana__session-date { font-size: 0.8rem; }
+.ana__session-spins { font-size: 0.72rem; }
+.ana__session-pnl { font-size: 1.2rem; font-weight: 700; }
+
+.ana__session-stats {
+  display: flex;
+  gap: var(--gap-md);
+}
+.ana__session-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.72rem;
+}
+.ana__session-stat .dimmed { font-size: 0.62rem; letter-spacing: 0.06em; }
+
+.ana__session-actions {
+  display: flex;
+  gap: var(--gap-sm);
+  justify-content: flex-end;
+}
+.ana__view-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: var(--gap-xs) var(--gap-md);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.ana__view-btn:hover { background: var(--border); color: var(--text); }
+.ana__del-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: var(--gap-xs) var(--gap-sm);
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+.ana__del-btn:hover {
+  color: var(--loss);
+  border-color: var(--loss-border);
+}
+
+/* Cross-table analysis */
+.ana__cross {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+}
+
+.ana__section-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* Aggregate grid */
+.ana__agg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-sm);
+}
+.ana__agg-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--gap-sm) var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ana__agg-label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+}
+.ana__agg-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Chart card */
+.ana__chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-md);
+}
+
+/* Table ranking */
+.ana__table-ranking {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.ana__table-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  border-bottom: 1px solid var(--border);
+}
+.ana__table-row:last-child { border-bottom: none; }
+.ana__table-rank {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--gold);
+  width: 30px;
+}
+.ana__table-name {
+  font-weight: 600;
+  flex: 1;
+}
+.ana__table-sessions {
+  font-size: 0.72rem;
+}
+.ana__table-pnl {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* Window compare */
+.ana__window-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-sm);
+}
+.ana__window-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-xs);
+}
+.ana__window-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+.ana__window-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.ana__window-sub { font-size: 0.7rem; }
+
+/* Switch stats */
+.ana__switch-stats, .ana__ratchet-stats {
+  display: flex;
+  gap: var(--gap-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--gap-md);
+}
+.ana__switch-stat, .ana__ratchet-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+}
+.ana__switch-stat .dimmed, .ana__ratchet-stat .dimmed {
+  font-size: 0.65rem;
+}
+
+/* Streak chart */
+.ana__streak-chart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+.ana__streak-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+.ana__streak-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  width: 20px;
+}
+.ana__streak-fill {
+  height: 16px;
+  background: var(--loss);
+  border-radius: var(--radius-sm);
+  min-width: 4px;
+}
+.ana__streak-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Highlights */
+.ana__highlights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-sm);
+}
+.ana__highlight {
+  border-radius: var(--radius-md);
+  padding: var(--gap-sm) var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.ana__highlight:hover { transform: scale(1.02); }
+.ana__highlight--best {
+  background: var(--win-bg);
+  border-color: var(--win-border);
+}
+.ana__highlight--worst {
+  background: var(--loss-bg);
+  border-color: var(--loss-border);
+}
+.ana__hl-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.ana__hl-table {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.ana__hl-date { font-size: 0.72rem; color: var(--text-dim); }
+.ana__hl-val { font-size: 1.1rem; font-weight: 700; }
+
+/* Mobile */
+@media (max-width: 480px) {
+  .ana__agg-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ana__highlights {
+    grid-template-columns: 1fr;
+  }
+}
