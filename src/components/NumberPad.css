@@ -8,8 +8,8 @@
 
 .numpad__zero {
   width: 100%;
-  padding: var(--gap-md);
-  font-size: 1.5rem;
+  padding: var(--gap-lg);
+  font-size: 2.5rem;
   font-weight: 700;
   font-family: var(--font-mono);
   background: var(--green-zero);
@@ -46,14 +46,17 @@
   flex: 1;
   aspect-ratio: 1;
   min-width: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  font-weight: 700;
   font-family: var(--font-mono);
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.15s;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .numpad__btn--red {
@@ -134,7 +137,11 @@
 /* Mobile adjustments */
 @media (max-width: 480px) {
   .numpad__btn {
-    font-size: 0.75rem;
+    font-size: clamp(1rem, 5vw, 1.4rem);
+  }
+  .numpad__zero {
+    font-size: 2rem;
+    padding: var(--gap-md);
   }
   .numpad__col-label {
     width: 24px;
