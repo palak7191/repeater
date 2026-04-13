@@ -51,6 +51,7 @@ function createInitialSessionState(settings) {
     consecWins: 0,
     consecWinsOnWide: 0,
     ratchetLevel: 0,
+    ratchetLossCount: 0,
     observing: false,
     observeBuffer: [],
     bankroll: settings.bankroll,
