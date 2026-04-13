@@ -1,14 +1,19 @@
 // ── COMPLETE STRATEGY LOGIC — CANONICAL CORRECT ─────────────────
+// Port of Python engine_correct.py - EXACT same execution order.
 // No forward-looking bias.
-// Bet is computed from history BEFORE current spin is appended.
 //
-// Order per spin:
-//   1. Check warmup (need WARMUP_COUNT history entries BEFORE betting)
-//   2. Compute bet from history (does NOT include current spin)
-//   3. Resolve outcome against that bet
-//   4. THEN append current spin to history
-//
-// This matches real table behaviour: you decide before the wheel spins.
+// 11 STEPS PER SPIN (matching Python exactly):
+//   1. Break if bankroll <= base (handled in UI)
+//   2. WARMUP - check history.length < WARMUP_COUNT, append, return
+//   3. COMPUTE BET from existing history (no current spin)
+//   4. OBSERVE-WAIT handling
+//   5. RESOLVE OUTCOME (pnl + ladder + counters inline)
+//   6. UPDATE BANKROLL
+//   7. UPDATE PEAK/DRAWDOWN/MAX_LADDER (tracked in session)
+//   8. APPEND TO HISTORY
+//   9. RATCHET UP
+//  10. RATCHET RESET
+//  11. WINDOW SWITCH
 
 import { WARMUP_COUNT, getDozens, getColumn, computeBet, resolveSpin } from './engine.js';
 
@@ -30,51 +35,57 @@ export const STRATEGY = {
 };
 
 // ── FULL SPIN PROCESSOR ──────────────────────────────────────
-// CORRECT ORDER:
-//   1. Check warmup from existing history
-//   2. Compute bet from existing history
-//   3. Resolve outcome
-//   4. Append to history AFTER resolving
+// Exact port of Python run_session() logic, one spin at a time.
 
 export function processFullSpin(num, sessionState, settings) {
-  const {
+  let {
     history,
     ladder,
     baseCurrent,
-    window,
+    window: curWindow,
     consecLosses,
     consecWins,
     consecWinsOnWide,
     ratchetLevel,
+    ratchetLossCount,
     observing,
     observeBuffer,
     netPnl,
     bankroll,
-    ratchetLossCount,
   } = sessionState;
 
   const {
-    baseBet, increment,
-    startWindow, wideWindow,
-    switchToWideAfterLosses, switchToWideNetThreshold,
+    baseBet,
+    increment,
+    startWindow,
+    wideWindow,
+    switchToWideAfterLosses,
+    switchToWideNetThreshold,
     switchBackAfterWins,
-    observeAtLadder, observeWindow, observeWinsNeeded,
+    observeAtLadder,
+    observeWindow,
+    observeWinsNeeded,
     pwResetBelowLadder,
-    ratchetAfterWins, ratchetAmount, ratchetMax,
+    ratchetAfterWins,
+    ratchetAmount,
+    ratchetMax,
     ratchetResetOnLoss,
     autoswitchEnabled,
     ratchetEnabled,
   } = settings;
 
-  // ── STEP 1: WARMUP CHECK (before appending) ────────────────
-  // Need WARMUP_COUNT history entries from previous spins before we can bet
-  if (history.length < WARMUP_COUNT) {
-    // Append AFTER warmup check
-    const newHistory = [...history];
+  // Clone history for mutation
+  let newHistory = [...history];
+
+  // ══════════════════════════════════════════════════════════════
+  // STEP 2: WARMUP CHECK
+  // Check warmup BEFORE appending. Need WARMUP_COUNT history
+  // entries from previous spins before we can bet.
+  // ══════════════════════════════════════════════════════════════
+  if (newHistory.length < WARMUP_COUNT) {
     if (num !== 0) {
       newHistory.push({ d: getDozens(num), c: getColumn(num), n: num });
     }
-
     return {
       spinRecord: {
         num,
@@ -83,176 +94,231 @@ export function processFullSpin(num, sessionState, settings) {
         bD: 0,
         bC: 0,
         betAmt: 0,
-        ladder: ladder,
-        window: window,
-        bankroll: bankroll,
+        ladder,
+        window: curWindow,
+        bankroll,
         switched: false,
         switchedTo: null,
         observing: false,
-        ratchetLevel: ratchetLevel,
+        ratchetLevel,
         timestamp: new Date().toISOString(),
       },
-      newState: { ...sessionState, history: newHistory },
+      newState: {
+        ...sessionState,
+        history: newHistory,
+      },
     };
   }
 
-  // ── STEP 2: COMPUTE BET from existing history (no current spin yet) ──
-  const betInfo = computeBet(history, window);
-  const { bD, bC } = betInfo;
+  // ══════════════════════════════════════════════════════════════
+  // STEP 3: COMPUTE BET from existing history (no current spin yet)
+  // ══════════════════════════════════════════════════════════════
+  const recent = newHistory.slice(-curWindow);
+  const dc = [0, 0, 0, 0];
+  const cc = [0, 0, 0, 0];
+  for (const h of recent) {
+    dc[h.d]++;
+    cc[h.c]++;
+  }
+  const bD = [1, 2, 3].reduce((a, b) => (dc[a] >= dc[b] ? a : b));
+  const bC = [1, 2, 3].reduce((a, b) => (cc[a] >= cc[b] ? a : b));
 
-  // ── STEP 3: OBSERVE-WAIT CHECK ─────────────────────────────
+  // ══════════════════════════════════════════════════════════════
+  // STEP 4: OBSERVE-WAIT
+  // ══════════════════════════════════════════════════════════════
   let newObserving = observing;
   let newObserveBuffer = [...observeBuffer];
 
-  if (observeAtLadder && !observing && ladder >= observeAtLadder) {
+  if (observeAtLadder && !newObserving && ladder >= observeAtLadder) {
     newObserving = true;
     newObserveBuffer = [];
   }
 
   if (newObserving) {
-    // Check if current spin would be a win against computed bet
     const dW = num !== 0 && getDozens(num) === bD;
     const cW = num !== 0 && getColumn(num) === bC;
-    const obsWin = (dW || cW) && num !== 0;
-    newObserveBuffer = [...newObserveBuffer, obsWin];
+    newObserveBuffer.push((dW || cW) && num !== 0);
 
     let resuming = false;
     if (newObserveBuffer.length >= observeWindow) {
-      const winsInBuffer = newObserveBuffer.filter(Boolean).length;
-      if (winsInBuffer >= observeWinsNeeded) {
+      if (newObserveBuffer.filter(Boolean).length >= observeWinsNeeded) {
         resuming = true;
         newObserving = false;
+        ladder = 0;
+        baseCurrent = baseBet + ratchetLevel * ratchetAmount;
         newObserveBuffer = [];
       } else {
-        // Slide window
         newObserveBuffer = newObserveBuffer.slice(1);
       }
     }
 
     // Append AFTER observe check
-    const newHistory = [...history];
     if (num !== 0) {
       newHistory.push({ d: getDozens(num), c: getColumn(num), n: num });
     }
-
-    const newLadder = resuming ? 0 : ladder;
-    const newBase = resuming ? baseBet + ratchetLevel * ratchetAmount : baseCurrent;
 
     return {
       spinRecord: {
         num,
         outcome: 'OBSERVE',
         pnl: 0,
-        bD: bD,
-        bC: bC,
+        bD,
+        bC,
         betAmt: 0,
-        ladder: newLadder,
-        window: window,
-        bankroll: bankroll,
+        ladder,
+        window: curWindow,
+        bankroll,
         switched: false,
         switchedTo: null,
         observing: !resuming,
-        ratchetLevel: ratchetLevel,
+        ratchetLevel,
         timestamp: new Date().toISOString(),
       },
       newState: {
         ...sessionState,
         history: newHistory,
+        ladder,
+        baseCurrent,
         observing: newObserving,
         observeBuffer: newObserveBuffer,
-        ladder: newLadder,
-        baseCurrent: newBase,
       },
     };
   }
 
-  // ── STEP 4: RESOLVE OUTCOME ────────────────────────────────
-  const betAmt = Math.min(baseCurrent + ladder * increment, Math.floor(bankroll / 2));
-  const { outcome, pnl } = resolveSpin(num, bD, bC, betAmt);
+  // ══════════════════════════════════════════════════════════════
+  // STEP 5: RESOLVE OUTCOME
+  // Calculate pnl, update ladder, update counters (all inline like Python)
+  // ══════════════════════════════════════════════════════════════
+  const eb = Math.min(baseCurrent + ladder * increment, Math.floor(bankroll / 2));
+  const dW = num !== 0 && getDozens(num) === bD;
+  const cW = num !== 0 && getColumn(num) === bC;
 
-  const isWin = outcome === 'BOTH-WIN' || outcome === 'PART-WIN';
-  const isLoss = !isWin;
+  let pnl;
+  let outcome;
+  let newLadder = ladder;
+  let newConsecWins = consecWins;
+  let newConsecLosses = consecLosses;
+  let newRatchetLossCount = ratchetLossCount || 0;
+  let newConsecWinsOnWide = consecWinsOnWide;
 
-  // ── STEP 5: APPEND TO HISTORY AFTER RESOLVING ──────────────
-  const newHistory = [...history];
+  if (num === 0) {
+    // ZERO
+    outcome = 'ZERO';
+    pnl = -(eb * 2);
+    newLadder = ladder + 1;
+    newConsecLosses = consecLosses + 1;
+    newConsecWins = 0;
+    newRatchetLossCount = newRatchetLossCount + 1;
+    if (curWindow === wideWindow) newConsecWinsOnWide = 0;
+  } else if (dW && cW) {
+    // BOTH-WIN
+    outcome = 'BOTH-WIN';
+    pnl = eb * 4;
+    newLadder = 0;
+    newConsecWins = consecWins + 1;
+    newConsecLosses = 0;
+    newRatchetLossCount = 0;
+    if (curWindow === wideWindow) newConsecWinsOnWide = consecWinsOnWide + 1;
+  } else if (dW || cW) {
+    // PART-WIN
+    outcome = 'PART-WIN';
+    pnl = eb;
+    newLadder = ladder >= pwResetBelowLadder ? ladder - 1 : 0;
+    newLadder = Math.max(0, newLadder);
+    newConsecWins = consecWins + 1;
+    newConsecLosses = 0;
+    newRatchetLossCount = 0;
+    if (curWindow === wideWindow) newConsecWinsOnWide = consecWinsOnWide + 1;
+  } else {
+    // MISS
+    outcome = 'MISS';
+    pnl = -(eb * 2);
+    newLadder = ladder + 1;
+    newConsecLosses = consecLosses + 1;
+    newConsecWins = 0;
+    newRatchetLossCount = newRatchetLossCount + 1;
+    if (curWindow === wideWindow) newConsecWinsOnWide = 0;
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // STEP 6: UPDATE BANKROLL
+  // ══════════════════════════════════════════════════════════════
+  const newBankroll = bankroll + pnl;
+  const newNetPnl = netPnl + pnl;
+
+  // ══════════════════════════════════════════════════════════════
+  // STEP 7: UPDATE PEAK/DRAWDOWN/MAX_LADDER
+  // (These are tracked in the session object by the reducer)
+  // ══════════════════════════════════════════════════════════════
+
+  // ══════════════════════════════════════════════════════════════
+  // STEP 8: APPEND TO HISTORY AFTER RESOLVING
+  // ══════════════════════════════════════════════════════════════
   if (num !== 0) {
     newHistory.push({ d: getDozens(num), c: getColumn(num), n: num });
   }
 
-  // ── STEP 6: UPDATE LADDER ──────────────────────────────────
-  let newLadder = ladder;
-  if (outcome === 'BOTH-WIN') {
-    newLadder = 0;
-  } else if (outcome === 'PART-WIN') {
-    newLadder = ladder >= pwResetBelowLadder ? Math.max(0, ladder - 1) : 0;
-  } else {
-    // MISS or ZERO
-    newLadder = ladder + 1;
-  }
-
-  // ── STEP 7: UPDATE CONSECUTIVE COUNTERS ────────────────────
-  const newConsecWins = isWin ? consecWins + 1 : 0;
-  const newConsecLosses = isLoss ? consecLosses + 1 : 0;
-  const newRatchetLossCount = isLoss ? (ratchetLossCount || 0) + 1 : 0;
-
-  // ── STEP 8: RATCHET UP ─────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════
+  // STEP 9: RATCHET UP
+  // ══════════════════════════════════════════════════════════════
   let newRatchetLevel = ratchetLevel;
   let newBaseCurrent = baseCurrent;
 
   if (ratchetEnabled && ratchetAfterWins) {
-    if (isWin && newConsecWins > 0 && newConsecWins % ratchetAfterWins === 0) {
+    if (newConsecWins > 0 && newConsecWins % ratchetAfterWins === 0) {
       const maxLevels = Math.floor((ratchetMax - baseBet) / Math.max(ratchetAmount, 1));
       newRatchetLevel = Math.min(ratchetLevel + 1, maxLevels);
       newBaseCurrent = Math.min(baseBet + newRatchetLevel * ratchetAmount, ratchetMax);
     }
   }
 
-  // ── STEP 9: RATCHET RESET ──────────────────────────────────
+  // ══════════════════════════════════════════════════════════════
+  // STEP 10: RATCHET RESET
+  // ══════════════════════════════════════════════════════════════
   if (ratchetEnabled && ratchetAfterWins && newRatchetLossCount >= ratchetResetOnLoss) {
     newRatchetLevel = 0;
     newBaseCurrent = baseBet;
   }
 
-  // ── STEP 10: UPDATE BANKROLL ───────────────────────────────
-  const newBankroll = bankroll + pnl;
-  const newNetPnl = netPnl + pnl;
-
-  // ── STEP 11: WINDOW SWITCH ─────────────────────────────────
-  let newWindow = window;
+  // ══════════════════════════════════════════════════════════════
+  // STEP 11: WINDOW SWITCH
+  // ══════════════════════════════════════════════════════════════
+  let newWindow = curWindow;
   let switched = false;
   let switchedTo = null;
 
-  let newConsecWinsOnWide = window === wideWindow
-    ? (isWin ? consecWinsOnWide + 1 : 0)
-    : 0;
-
   if (autoswitchEnabled && switchToWideAfterLosses) {
-    if (window === startWindow) {
+    if (curWindow === startWindow) {
       if (newConsecLosses >= switchToWideAfterLosses && newNetPnl <= switchToWideNetThreshold) {
         newWindow = wideWindow;
         switched = true;
         switchedTo = wideWindow;
         newConsecWinsOnWide = 0;
-        // Reset consec loss after switch
+        newConsecLosses = 0;
       }
-    } else if (window === wideWindow) {
+    } else if (curWindow === wideWindow) {
       if (newConsecWinsOnWide >= switchBackAfterWins) {
         newWindow = startWindow;
         switched = true;
         switchedTo = startWindow;
+        newConsecLosses = 0;
+        newConsecWinsOnWide = 0;
       }
     }
   }
 
+  // ══════════════════════════════════════════════════════════════
+  // RETURN SPIN RECORD AND NEW STATE
+  // ══════════════════════════════════════════════════════════════
   const spinRecord = {
     num,
     outcome,
     pnl,
     bD,
     bC,
-    betAmt,
+    betAmt: eb,
     ladder: newLadder,
-    window: window,
+    window: curWindow,
     bankroll: newBankroll,
     switched,
     switchedTo,
@@ -268,7 +334,7 @@ export function processFullSpin(num, sessionState, settings) {
     ladder: newLadder,
     baseCurrent: newBaseCurrent,
     window: newWindow,
-    consecLosses: switched ? 0 : newConsecLosses,
+    consecLosses: newConsecLosses,
     consecWins: newConsecWins,
     consecWinsOnWide: newConsecWinsOnWide,
     ratchetLevel: newRatchetLevel,
@@ -286,7 +352,7 @@ export function processFullSpin(num, sessionState, settings) {
 // What to show the user before they enter the next spin.
 // Computed from current history (which does NOT include next spin yet).
 export function getNextInstruction(sessionState, settings) {
-  const { history, ladder, baseCurrent, window, observing } = sessionState;
+  const { history, ladder, baseCurrent, window: curWindow, observing } = sessionState;
   const { increment, observeAtLadder } = settings;
   const bankroll = sessionState.bankroll;
 
@@ -309,7 +375,7 @@ export function getNextInstruction(sessionState, settings) {
   }
 
   // Compute bet from current history
-  const bet = computeBet(history, window);
+  const bet = computeBet(history, curWindow);
   if (!bet) {
     return { type: 'WARMUP', warmupDone: history.length, warmupTotal: WARMUP_COUNT };
   }
@@ -330,14 +396,13 @@ export function getNextInstruction(sessionState, settings) {
     bC,
     betAmt,
     ladder,
-    window,
+    window: curWindow,
     urgency,
     baseCurrent,
   };
 }
 
 // ── INTERSECTION NUMBERS ─────────────────────────────────────
-// The exact numbers to place chips on.
 export function getChipNumbers(bD, bC) {
   const numbers = [];
   for (let n = 1; n <= 36; n++) {
