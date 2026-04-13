@@ -286,52 +286,8 @@
     background: var(--s3);
     color: var(--text);
   }
-  /* Keyboard input row */
-  .keyboard-entry {
-    display: none;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .keyboard-entry.visible { display: flex; }
-  .kb-input {
-    flex: 1;
-    background: var(--s2);
-    border: 2px solid var(--border2);
-    border-radius: var(--r);
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 28px;
-    font-weight: 700;
-    padding: 12px 16px;
-    text-align: center;
-    outline: none;
-    -moz-appearance: textfield;
-  }
-  .kb-input::-webkit-inner-spin-button,
-  .kb-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-  .kb-input:focus { border-color: var(--gold); }
-  .kb-input.has-val { border-color: var(--gold); }
-  .kb-enter-btn {
-    padding: 12px 20px;
-    background: var(--win);
-    border: none;
-    border-radius: var(--r);
-    color: #000;
-    font-family: var(--font-ui);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .kb-enter-btn:active { opacity: .85; }
-  .kb-hint {
-    font-size: 11px;
-    color: var(--dim);
-    text-align: center;
-    margin-bottom: 8px;
-    font-family: var(--font-mono);
-  }
+
+
 
   /* ── INLINE KEYBOARD INPUT ── */
   .kb-row {
@@ -867,7 +823,17 @@
       </div>
       <div class="card">
         <div style="font-size:11px;color:var(--dim);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Enter Spin Result</div>
-        <div class="entry-display" id="entry-display-wu" style="margin-bottom:10px;min-height:60px">
+        <div class="kb-row">
+          <input class="kb-inline" id="kb-inline-wu" type="number"
+                 min="0" max="36" placeholder="type number..."
+                 autocomplete="off" inputmode="numeric"
+                 oninput="onKbInlineInputPhase('wu')"
+                 onkeydown="onKbInlineKeydownPhase(event,'wu')">
+          <button class="kb-inline-enter disabled" id="kb-inline-enter-wu"
+                  onclick="onKbInlineEnterPhase('wu')">↵ ENTER</button>
+        </div>
+        <div class="kb-inline-hint" id="kb-inline-hint-wu">type 0–36 then press Enter</div>
+                <div class="entry-display" id="entry-display-wu" style="margin-bottom:10px;min-height:60px">
           <div class="entry-num empty" id="entry-num-wu">—</div>
           <div class="entry-hint" id="entry-hint-wu">type the number</div>
         </div>
@@ -897,7 +863,17 @@
       </div>
       <div class="card">
         <div style="font-size:11px;color:var(--dim);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Enter Spin Result (watching only)</div>
-        <div class="entry-display" id="entry-display-obs" style="margin-bottom:10px;min-height:60px">
+        <div class="kb-row">
+          <input class="kb-inline" id="kb-inline-obs" type="number"
+                 min="0" max="36" placeholder="type number..."
+                 autocomplete="off" inputmode="numeric"
+                 oninput="onKbInlineInputPhase('obs')"
+                 onkeydown="onKbInlineKeydownPhase(event,'obs')">
+          <button class="kb-inline-enter disabled" id="kb-inline-enter-obs"
+                  onclick="onKbInlineEnterPhase('obs')">↵ ENTER</button>
+        </div>
+        <div class="kb-inline-hint" id="kb-inline-hint-obs">type 0–36 then press Enter</div>
+                <div class="entry-display" id="entry-display-obs" style="margin-bottom:10px;min-height:60px">
           <div class="entry-num empty" id="entry-num-obs">—</div>
           <div class="entry-hint" id="entry-hint-obs">type the number</div>
         </div>
@@ -976,15 +952,15 @@
 
         <!-- Keyboard / type input — always visible on desktop -->
         <div class="kb-row">
-          <input class="kb-inline" id="kb-inline" type="number"
+          <input class="kb-inline" id="kb-inline-enter-enter" type="number"
                  min="0" max="36" placeholder="type number..."
                  autocomplete="off" inputmode="numeric"
-                 oninput="onKbInlineInput()"
-                 onkeydown="onKbInlineKeydown(event)">
+                 oninput="onKbInlineInputPhase('enter')"
+                 onkeydown="onKbInlineKeydownPhase(event,'enter')">
           <button class="kb-inline-enter disabled" id="kb-inline-enter"
-                  onclick="onKbInlineEnter()">↵ ENTER</button>
+                  onclick="onKbInlineEnterPhase('enter')">↵ ENTER</button>
         </div>
-        <div class="kb-inline-hint" id="kb-inline-hint">type 0–36 then press Enter</div>
+        <div class="kb-inline-hint" id="kb-inline-hint-enter">type 0–36 then press Enter</div>
 
         <!-- Display + grid + keypad — always visible -->
         <div class="entry-display" id="entry-display">
@@ -2227,97 +2203,11 @@ function showScreen(name) {
 
 
 // ── ENTRY MODE ──────────────────────────────────────────────
-let entryMode = 'keypad'; // 'keypad' or 'keyboard'
 
-function setEntryMode(mode) {
-  entryMode = mode;
-  document.getElementById('mode-keypad-btn').classList.toggle('active', mode === 'keypad');
-  document.getElementById('mode-keyboard-btn').classList.toggle('active', mode === 'keyboard');
 
-  // Show/hide sections
-  const keypadSections = ['entry-display', 'ref-grid', 'keypad'];
-  keypadSections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = mode === 'keypad' ? '' : 'none';
-  });
 
-  const kbEntry = document.getElementById('keyboard-entry');
-  const kbHint  = document.getElementById('kb-hint');
-  kbEntry.classList.toggle('visible', mode === 'keyboard');
-  if (kbHint) kbHint.style.display = mode === 'keyboard' ? 'block' : 'none';
 
-  if (mode === 'keyboard') {
-    const inp = document.getElementById('kb-input');
-    inp.value = '';
-    inp.classList.remove('has-val');
-    updateKbHint('');
-    setTimeout(() => inp.focus(), 50);
-  } else {
-    entryBuffer = '';
-    updateEntryDisplay();
-  }
-}
 
-function onKbInput() {
-  const inp = document.getElementById('kb-input');
-  let val = inp.value.replace(/[^0-9]/g, '');
-  // Cap at 2 digits
-  if (val.length > 2) val = val.slice(0,2);
-  // Cap at 36
-  if (parseInt(val) > 36) val = '36';
-  inp.value = val;
-  inp.classList.toggle('has-val', val !== '');
-  updateKbHint(val);
-}
-
-function updateKbHint(val) {
-  const hint = document.getElementById('kb-hint');
-  if (!hint) return;
-  if (val === '' || val === null) {
-    hint.textContent = 'type number then press Enter';
-    hint.style.color = 'var(--muted)';
-    return;
-  }
-  const num = parseInt(val);
-  if (isNaN(num) || num < 0 || num > 36) {
-    hint.textContent = 'enter 0–36';
-    hint.style.color = 'var(--loss)';
-    return;
-  }
-  if (num === 0) {
-    hint.textContent = '0 · ZERO — press Enter to confirm';
-    hint.style.color = 'var(--zero)';
-    return;
-  }
-  const d = getDozens(num);
-  const c = getColumn(num);
-  const dNames = ['','D1 (1-12)','D2 (13-24)','D3 (25-36)'];
-  const cNames = ['','C1','C2','C3'];
-  const isRed = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(num);
-  hint.textContent = `${num} · ${dNames[d]} · ${cNames[c]} — press Enter to confirm`;
-  hint.style.color = isRed ? 'var(--red-n)' : 'var(--text)';
-}
-
-function onKbKeydown(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    onKbEnter();
-  }
-}
-
-function onKbEnter() {
-  const inp = document.getElementById('kb-input');
-  const val = inp.value.trim();
-  if (val === '') return;
-  const num = parseInt(val);
-  if (isNaN(num) || num < 0 || num > 36) return;
-  // Clear input ready for next
-  inp.value = '';
-  inp.classList.remove('has-val');
-  updateKbHint('');
-  inp.focus();
-  enterSpin(num);
-}
 
 // ─── INIT ───────────────────────────────────────────────
 buildRefGrid(); updateEntryDisplay();
