@@ -120,13 +120,6 @@ export default function Live({ onSummary, onAnalytics, onSettings }) {
       <div className="live__main">
         {/* Left panel */}
         <div className="live__left">
-          {/* Sparkline */}
-          {currentSession?.pnlCurve && currentSession.pnlCurve.length > 1 && (
-            <div className="live__sparkline">
-              <Sparkline values={currentSession.pnlCurve} height={80} />
-            </div>
-          )}
-
           {/* Number pad */}
           <NumberPad
             onNumber={handleNumber}
